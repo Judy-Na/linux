@@ -108,6 +108,21 @@ config PCI_PF_STUB
 
 	  When in doubt, say N.
 
+config PCI_OF_OVERLAY
+	tristate "Generic PCI device-tree overlay"
+	select OF_OVERLAY
+	select OF_DYNAMIC
+	select PCI_DYNAMIC_OF_NODES
+	help
+	  Module used by PCI drivers whose endpoint internals are
+	  described by a firmware-provided DT overlay (typically a
+	  simple-bus with BAR-derived ranges). The module applies the
+	  overlay, registers an irqdomain backed by MSI/MSI-X or shared
+	  INTx, and lets stock subsystem drivers probe the resulting
+	  platform devices.
+
+	  When in doubt, say N.
+
 config XEN_PCIDEV_FRONTEND
 	tristate "Xen PCI Frontend"
 	depends on XEN_PV
