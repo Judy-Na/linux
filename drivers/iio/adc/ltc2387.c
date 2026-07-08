@@ -150,7 +150,7 @@ struct ltc2387_dev {
 	struct clk *ref_clk;
 
 	unsigned int vref_mv;
-	int sampling_freq;
+	u32 sampling_freq;
 };
 
 static int ltc2387_set_sampling_freq(struct ltc2387_dev *ltc, int freq)
