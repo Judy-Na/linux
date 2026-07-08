@@ -84,24 +84,26 @@ struct ltc2387_info {
 	int resolution;
 };
 
+#define LTC2387_TEST_PATTERN_16 {					\
+	[ONE_LANE]  = 0b1010000001111111,				\
+	[TWO_LANES] = 0b1100110000111111,				\
+}
+
+#define LTC2387_TEST_PATTERN_18 {					\
+	[ONE_LANE]  = 0b101000000111111100,				\
+	[TWO_LANES] = 0b110011000011111100,				\
+}
+
 static const struct ltc2387_info ltc2387_infos[] = {
 	[ID_LTC2387_16] = {
 		.resolution = 16,
-		.test_pattern = {
-			[ONE_LANE] = 0b1010000001111111,
-			[TWO_LANES] = 0b1100110000111111
-		},
-		.channels = {
-			LTC2378_CHAN(16, 16),
-		},
+		.test_pattern = LTC2387_TEST_PATTERN_16,
+		.channels = { LTC2378_CHAN(16, 16) },
 		.num_channels = 1,
 	},
 	[ID_LTC2387_16_X4] = {
 		.resolution = 16,
-		.test_pattern = {
-			[ONE_LANE] = 0b1010000001111111,
-			[TWO_LANES] = 0b1100110000111111
-		},
+		.test_pattern = LTC2387_TEST_PATTERN_16,
 		.channels = {
 			LTC2378_MULTIPLE_CHAN(0, 64, 16, 0),
 			LTC2378_MULTIPLE_CHAN(1, 64, 16, 16),
@@ -112,21 +114,13 @@ static const struct ltc2387_info ltc2387_infos[] = {
 	},
 	[ID_LTC2387_18] = {
 		.resolution = 18,
-		.test_pattern = {
-			[ONE_LANE] = 0b101000000111111100,
-			[TWO_LANES] = 0b110011000011111100
-		},
-		.channels = {
-			LTC2378_CHAN(18, 32),
-		},
+		.test_pattern = LTC2387_TEST_PATTERN_18,
+		.channels = { LTC2378_CHAN(18, 32) },
 		.num_channels = 1,
 	},
 	[ID_LTC2387_18_X4] = {
 		.resolution = 18,
-		.test_pattern = {
-			[ONE_LANE] = 0b101000000111111100,
-			[TWO_LANES] = 0b110011000011111100
-		},
+		.test_pattern = LTC2387_TEST_PATTERN_18,
 		.channels = {
 			LTC2378_MULTIPLE_CHAN(0, 128, 32, 0),
 			LTC2378_MULTIPLE_CHAN(1, 128, 32, 32),
