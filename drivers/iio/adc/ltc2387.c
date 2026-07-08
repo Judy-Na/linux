@@ -219,10 +219,6 @@ static int ltc2387_set_sampling_freq(struct ltc2387_dev *ltc, int freq)
 		pr_err("\nadaq2387 cnv_wf.period_length_ns=%llu", cnv_wf.period_length_ns);
 	}
 
-	ret = pwm_set_waveform_might_sleep(ltc->cnv, &cnv_wf, false);
-	if (ret < 0)
-		return ret;
-
 	/* Gate the active period of the clock (see page 10-13 for both LTC's) */
 	if (ltc->lane_mode == TWO_LANES) {
 		clk_en_time = DIV_ROUND_UP_ULL(ltc->device_info->resolution, 4);
@@ -232,9 +228,13 @@ static int ltc2387_set_sampling_freq(struct ltc2387_dev *ltc, int freq)
 		pr_err("\nadaq2387 TWOLANE=0\n");
 	}
 
-	clk_gate_wf.period_length_ns = cnv_wf.period_length_ns;
 	clk_gate_wf.duty_length_ns = ref_clk_period_ns * clk_en_time;
 	clk_gate_wf.duty_offset_ns = LTC2387_T_FIRSTCLK_NS;
+
+	if (cnv_wf.period_length_ns < clk_gate_wf.duty_length_ns)
+		cnv_wf.period_length_ns = clk_gate_wf.duty_length_ns + ref_clk_period_ns;
+
+	clk_gate_wf.period_length_ns = cnv_wf.period_length_ns;
 
 	pr_err("\nadaq2387 clk_en_time=%d", clk_en_time);
 	pr_err("\nadaq2387 clk_gate_wf.period_length_ns=%llu", clk_gate_wf.period_length_ns);
@@ -246,6 +246,11 @@ static int ltc2387_set_sampling_freq(struct ltc2387_dev *ltc, int freq)
 				&clk_gate_wf.duty_offset_ns);
 
 	pr_err("\nadaq2387 clk_gate_wf.duty_offset_ns=%llu", clk_gate_wf.duty_offset_ns);
+
+	ret = pwm_set_waveform_might_sleep(ltc->cnv, &cnv_wf, false);
+	if (ret < 0)
+		return ret;
+
 	ret = pwm_set_waveform_might_sleep(ltc->clk_en, &clk_gate_wf, false);
 	if (ret < 0)
 		return ret;
