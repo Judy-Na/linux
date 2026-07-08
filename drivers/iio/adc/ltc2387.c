@@ -140,13 +140,10 @@ static const struct ltc2387_info ltc2387_infos[] = {
 struct ltc2387_dev {
 	const struct ltc2387_info *device_info;
 	enum ltc2387_lane_modes lane_mode;
-	struct gpio_desc *gpio_testpat;
 	unsigned long ref_clk_rate;
 	struct pwm_device *clk_en;
 	struct regulator *vref;
 	struct pwm_device *cnv;
-	struct pwm_waveform clk_gate_wf;
-	struct pwm_waveform cnv_wf;
 	struct clk *ref_clk;
 
 	unsigned int vref_mv;
