@@ -275,21 +275,14 @@ static int ltc2387_read_raw(struct iio_dev *indio_dev,
 			    int *val, int *val2, long info)
 {
 	struct ltc2387_dev *ltc = iio_priv(indio_dev);
-	unsigned int temp;
 
 	switch (info) {
 	case IIO_CHAN_INFO_SAMP_FREQ:
 		*val = ltc->sampling_freq;
-
 		return IIO_VAL_INT;
 	case IIO_CHAN_INFO_SCALE:
-		temp = regulator_get_voltage(ltc->vref);
-		if (temp < 0)
-			return temp;
-
-		*val = (temp * 2) / 1000;
+		*val = ltc->vref_mv * 2;
 		*val2 = chan->scan_type.realbits;
-
 		return IIO_VAL_FRACTIONAL_LOG2;
 	default:
 		return -EINVAL;
