@@ -291,7 +291,7 @@ static int ltc2387_write_raw(struct iio_dev *indio_dev,
 	}
 }
 
-static void ltc2387_pwm_diasble(void *data)
+static void ltc2387_pwm_disable(void *data)
 {
 	pwm_disable(data);
 }
@@ -393,7 +393,7 @@ static int ltc2387_probe(struct platform_device *pdev)
 	if (IS_ERR(ltc->clk_en))
 		return PTR_ERR(ltc->clk_en);
 
-	ret = devm_add_action_or_reset(&pdev->dev, ltc2387_pwm_diasble,
+	ret = devm_add_action_or_reset(&pdev->dev, ltc2387_pwm_disable,
 				       ltc->clk_en);
 	if (ret)
 		return ret;
@@ -402,7 +402,7 @@ static int ltc2387_probe(struct platform_device *pdev)
 	if (IS_ERR(ltc->cnv))
 		return PTR_ERR(ltc->cnv);
 
-	ret = devm_add_action_or_reset(&pdev->dev, ltc2387_pwm_diasble,
+	ret = devm_add_action_or_reset(&pdev->dev, ltc2387_pwm_disable,
 				       ltc->cnv);
 
 	if (ret)
