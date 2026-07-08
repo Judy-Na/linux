@@ -75,9 +75,13 @@ enum ltc2387_id {
 	ID_LTC2387_16_X4,
 	ID_LTC2387_18,
 	ID_LTC2387_18_X4,
+	ID_ADAQ23875,
+	ID_ADAQ23876,
+	ID_ADAQ23878,
 };
 
 struct ltc2387_info {
+	const char *name;
 	struct iio_chan_spec channels[4];
 	unsigned int test_pattern[2];
 	int num_channels;
@@ -96,12 +100,14 @@ struct ltc2387_info {
 
 static const struct ltc2387_info ltc2387_infos[] = {
 	[ID_LTC2387_16] = {
+		.name = "ltc2387-16",
 		.resolution = 16,
 		.test_pattern = LTC2387_TEST_PATTERN_16,
 		.channels = { LTC2378_CHAN(16, 16) },
 		.num_channels = 1,
 	},
 	[ID_LTC2387_16_X4] = {
+		.name = "ltc2387-16-x4",
 		.resolution = 16,
 		.test_pattern = LTC2387_TEST_PATTERN_16,
 		.channels = {
@@ -113,12 +119,14 @@ static const struct ltc2387_info ltc2387_infos[] = {
 		.num_channels = 4,
 	},
 	[ID_LTC2387_18] = {
+		.name = "ltc2387-18",
 		.resolution = 18,
 		.test_pattern = LTC2387_TEST_PATTERN_18,
 		.channels = { LTC2378_CHAN(18, 32) },
 		.num_channels = 1,
 	},
 	[ID_LTC2387_18_X4] = {
+		.name = "ltc2387-18-x4",
 		.resolution = 18,
 		.test_pattern = LTC2387_TEST_PATTERN_18,
 		.channels = {
@@ -128,6 +136,27 @@ static const struct ltc2387_info ltc2387_infos[] = {
 			LTC2378_MULTIPLE_CHAN(3, 128, 32, 96),
 		},
 		.num_channels = 4,
+	},
+	[ID_ADAQ23875] = {
+		.name = "adaq23875",
+		.resolution = 16,
+		.test_pattern = LTC2387_TEST_PATTERN_16,
+		.channels = { LTC2378_CHAN(16, 16) },
+		.num_channels = 1,
+	},
+	[ID_ADAQ23876] = {
+		.name = "adaq23876",
+		.resolution = 16,
+		.test_pattern = LTC2387_TEST_PATTERN_16,
+		.channels = { LTC2378_CHAN(16, 16) },
+		.num_channels = 1,
+	},
+	[ID_ADAQ23878] = {
+		.name = "adaq23878",
+		.resolution = 18,
+		.test_pattern = LTC2387_TEST_PATTERN_18,
+		.channels = { LTC2378_CHAN(18, 32) },
+		.num_channels = 1,
 	},
 };
 
@@ -317,13 +346,13 @@ static const struct of_device_id ltc2387_of_match[] = {
 		.data = &ltc2387_infos[ID_LTC2387_18_X4]
 	}, {
 		.compatible = "adaq23875",
-		.data = &ltc2387_infos[ID_LTC2387_16]
+		.data = &ltc2387_infos[ID_ADAQ23875]
 	}, {
 		.compatible = "adaq23876",
-		.data = &ltc2387_infos[ID_LTC2387_16]
+		.data = &ltc2387_infos[ID_ADAQ23876]
 	}, {
 		.compatible = "adaq23878",
-		.data = &ltc2387_infos[ID_LTC2387_18]
+		.data = &ltc2387_infos[ID_ADAQ23878]
 	},
 	{}
 };
