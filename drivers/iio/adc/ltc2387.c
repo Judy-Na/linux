@@ -434,7 +434,7 @@ static int ltc2387_probe(struct platform_device *pdev)
 	indio_dev->channels = ltc->device_info->channels;
 	indio_dev->num_channels = ltc->device_info->num_channels;
 	indio_dev->dev.parent = &pdev->dev;
-	indio_dev->name = pdev->dev.of_node->name;
+	indio_dev->name = ltc->device_info->name;
 	indio_dev->info = &ltc2387_info;
 	indio_dev->modes = INDIO_BUFFER_HARDWARE;
 	ret = devm_iio_dmaengine_buffer_setup(indio_dev->dev.parent,
