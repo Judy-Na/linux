@@ -354,7 +354,7 @@ static int ltc2387_probe(struct platform_device *pdev)
 	if (!IS_ERR(ltc->vref)) {
 		ret = regulator_enable(ltc->vref);
 		if (ret) {
-			dev_err(&pdev->dev, "Can't to enable vref regulator\n");
+			dev_err(&pdev->dev, "Can't enable vref regulator\n");
 			return ret;
 		}
 		ret = regulator_get_voltage(ltc->vref);
