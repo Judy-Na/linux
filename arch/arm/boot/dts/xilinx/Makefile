@@ -1,5 +1,11 @@
 # SPDX-License-Identifier: GPL-2.0
 dtb-$(CONFIG_ARCH_ZYNQ) += \
+	zynq-zed-adv7511-hmcad15xx.dtb \
+	zynq-zed-adv7511-hmcad15xx_12b.dtb \
+	zynq-zed-adv7511-hmcad15xx_dual.dtb \
+	zynq-zed-adv7511-hmcad15xx_12b_dual.dtb \
+	zynq-zed-adv7511-hmcad15xx_quad.dtb \
+	zynq-zed-adv7511-hmcad15xx_12b_quad.dtb \
 	zynq-cc108.dtb \
 	zynq-ebaz4205.dtb \
 	zynq-microzed.dtb \
