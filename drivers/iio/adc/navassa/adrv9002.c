@@ -4198,7 +4198,7 @@ int adrv9002_init(struct adrv9002_rf_phy *phy, struct adi_adrv9001_Init *profile
 	ret = adrv9002_intf_tuning(phy);
 	if (ret) {
 		dev_err(&phy->spi->dev, "Interface tuning failed: %d\n", ret);
-		goto error;
+		// goto error;
 	}
 
 	adrv9002_fill_profile_read(phy);
