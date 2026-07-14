@@ -81,7 +81,7 @@
 			#address-cells = <1>;
 
 			eeprom1: eeprom@50 {
-				compatible = "at24,24c02";
+				compatible = "atmel,24c32";
 				reg = <0x50>;
 			};
 
