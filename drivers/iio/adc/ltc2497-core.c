@@ -9,6 +9,7 @@
 #include <linux/delay.h>
 #include <linux/iio/iio.h>
 #include <linux/iio/driver.h>
+#include <linux/math64.h>
 #include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/regulator/consumer.h>
@@ -95,10 +96,46 @@ static int ltc2497core_read_raw(struct iio_dev *indio_dev,
 		if (ret < 0)
 			return ret;
 
+		if (chan->type == IIO_TEMP) {
+			/*
+			 * IIO reports temperatures in milli-degrees Celsius and
+			 * the core computes the processed value as
+			 *   T[m°C] = (raw + offset) * scale
+			 *
+			 * The LTC2499 PTAT sensor yields the absolute temperature
+			 *   T(K) = DATAOUT24 * Vref / 1570      (Vref in volts)
+			 * but the raw value exported here is normalised to
+			 * 2^(resolution + 1) == 2^25, i.e. raw = 2 * DATAOUT24, so
+			 *   T(K) = raw * Vref / 3140.
+			 * Converting K -> m°C (x1000) and Vref uV -> V (/1e6):
+			 *   scale[m°C/LSB] = Vref_uV / 3140000
+			 */
+			*val = ret;
+			*val2 = 3140000;
+			return IIO_VAL_FRACTIONAL;
+		}
+
 		*val = ret / 1000;
 		*val2 = ddata->chip_info->resolution + 1;
 
 		return IIO_VAL_FRACTIONAL_LOG2;
+
+	case IIO_CHAN_INFO_OFFSET:
+		if (chan->type == IIO_TEMP) {
+			ret = regulator_get_voltage(ddata->ref);
+			if (ret < 0)
+				return ret;
+			/*
+			 * 0 °C == 273.15 K must map to raw + offset such that
+			 * (raw + offset) * scale == 0 m°C, i.e.
+			 *   offset = -273150 / scale
+			 *          = -273150 * 3140000 / Vref_uV
+			 * Computed in 64-bit to avoid overflow.
+			 */
+			*val = (int)div_s64(-273150LL * 3140000LL, ret);
+			return IIO_VAL_INT;
+		}
+		return -EINVAL;
 
 	default:
 		return -EINVAL;
@@ -126,6 +163,20 @@ static int ltc2497core_read_raw(struct iio_dev *indio_dev,
 	.differential = 1, \
 }
 
+#define LTC2497_TEMP_CHANNEL { \
+	.type = IIO_TEMP, \
+	.address = LTC2497_TEMP_ADDR, \
+	.info_mask_separate = BIT(IIO_CHAN_INFO_RAW) | \
+			      BIT(IIO_CHAN_INFO_SCALE) | \
+			      BIT(IIO_CHAN_INFO_OFFSET), \
+	.datasheet_name = "TEMP", \
+}
+
+/*
+ * The 32 voltage channels are shared by every part in the family.  The LTC2499
+ * appends one temperature channel; it is kept last so that parts without an
+ * internal temperature sensor can simply exclude it via num_channels.
+ */
 static const struct iio_chan_spec ltc2497core_channel[] = {
 	LTC2497_CHAN(0, LTC2497_SGL, "CH0"),
 	LTC2497_CHAN(1, LTC2497_SGL, "CH1"),
@@ -159,6 +210,7 @@ static const struct iio_chan_spec ltc2497core_channel[] = {
 	LTC2497_CHAN_DIFF(5, LTC2497_DIFF | LTC2497_SIGN),
 	LTC2497_CHAN_DIFF(6, LTC2497_DIFF | LTC2497_SIGN),
 	LTC2497_CHAN_DIFF(7, LTC2497_DIFF | LTC2497_SIGN),
+	LTC2497_TEMP_CHANNEL,
 };
 
 static const struct iio_info ltc2497core_info = {
@@ -182,7 +234,13 @@ int ltc2497core_probe(struct device *dev, struct iio_dev *indio_dev)
 	indio_dev->info = &ltc2497core_info;
 	indio_dev->modes = INDIO_DIRECT_MODE;
 	indio_dev->channels = ltc2497core_channel;
+	/*
+	 * The temperature channel is the last entry; drop it for parts without
+	 * an internal temperature sensor.
+	 */
 	indio_dev->num_channels = ARRAY_SIZE(ltc2497core_channel);
+	if (!ddata->chip_info->has_temp)
+		indio_dev->num_channels--;
 
 	ret = ddata->result_and_measure(ddata, LTC2497_CONFIG_DEFAULT, NULL);
 	if (ret < 0)
