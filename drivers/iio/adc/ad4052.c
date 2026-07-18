@@ -51,6 +51,7 @@
 #define AD4052_REG_ADC_MODES				0x21
 #define     AD4052_REG_ADC_MODES_MODE_MSK		GENMASK(1, 0)
 #define AD4052_REG_ADC_CONFIG				0x22
+#define     AD4052_REG_ADC_CONFIG_SIGN_EXT_EN_MSK	BIT(6)
 #define     AD4052_REG_ADC_CONFIG_REF_EN_MSK		BIT(5)
 #define     AD4052_REG_ADC_CONFIG_SCALE_EN_MSK		BIT(4)
 #define AD4052_REG_AVG_CONFIG				0x23
@@ -523,6 +524,14 @@ static int ad4052_set_sampling_frequency(struct ad4052_state *st, int val, int v
 	return 0;
 }
 
+static int ad4052_set_sign_ext(struct ad4052_state *st, bool en)
+{
+	return regmap_update_bits(st->regmap, AD4052_REG_ADC_CONFIG,
+				  AD4052_REG_ADC_CONFIG_SIGN_EXT_EN_MSK,
+				  FIELD_PREP(AD4052_REG_ADC_CONFIG_SIGN_EXT_EN_MSK,
+					     en));
+}
+
 static int ad4052_update_xfer_raw(struct iio_dev *indio_dev,
 				  struct iio_chan_spec const *chan)
 {
@@ -539,7 +548,7 @@ static int ad4052_update_xfer_raw(struct iio_dev *indio_dev,
 	xfer->len = spi_bpw_to_bytes(scan_type->realbits);
 	xfer->speed_hz = AD4052_SPI_MAX_ADC_XFER_SPEED(st->vio_uV);
 
-	return 0;
+	return ad4052_set_sign_ext(st, xfer->bits_per_word == 32);
 }
 
 static int ad4052_update_xfer_offload(struct iio_dev *indio_dev,
@@ -548,6 +557,7 @@ static int ad4052_update_xfer_offload(struct iio_dev *indio_dev,
 	struct ad4052_state *st = iio_priv(indio_dev);
 	const struct iio_scan_type *scan_type;
 	struct spi_transfer *xfer = &st->offload_xfer;
+	int ret;
 
 	scan_type = iio_get_current_scan_type(indio_dev, chan);
 	if (IS_ERR(scan_type))
@@ -557,6 +567,10 @@ static int ad4052_update_xfer_offload(struct iio_dev *indio_dev,
 	xfer->offload_flags = SPI_OFFLOAD_XFER_RX_STREAM;
 	xfer->len = spi_bpw_to_bytes(scan_type->realbits);
 	xfer->speed_hz = AD4052_SPI_MAX_ADC_XFER_SPEED(st->vio_uV);
+
+	ret = ad4052_set_sign_ext(st, xfer->bits_per_word == 32);
+	if (ret)
+		return ret;
 
 	spi_message_init_with_transfers(&st->offload_msg, &st->offload_xfer, 1);
 	st->offload_msg.offload = st->offload;
