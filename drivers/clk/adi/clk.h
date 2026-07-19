@@ -37,22 +37,6 @@
 #define CGU_DIVEX       0x40
 #define CGU_REVID       0x48
 
-#define CDU_CFG0     0x00
-#define CDU_CFG1     0x04
-#define CDU_CFG2     0x08
-#define CDU_CFG3     0x0C
-#define CDU_CFG4     0x10
-#define CDU_CFG5     0x14
-#define CDU_CFG6     0x18
-#define CDU_CFG7     0x1C
-#define CDU_CFG8     0x20
-#define CDU_CFG9     0x24
-#define CDU_CFG10    0x28
-#define CDU_CFG11    0x2C
-#define CDU_CFG12    0x30
-#define CDU_CFG13    0x34
-#define CDU_CFG14    0x38
-
 #define PLL3_OFFSET 0x2c
 
 #define CDU_CLKINSEL 0x44
@@ -67,6 +51,8 @@
 #define CDU_MUX_SHIFT 1
 #define CDU_MUX_WIDTH 2
 #define CDU_EN_BIT 0
+
+extern spinlock_t adsp_lock;
 
 struct clk_sc5xx_cgu_pll *to_clk_sc5xx_cgu_pll(struct clk_hw *hw);
 
